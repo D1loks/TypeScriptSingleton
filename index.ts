@@ -116,26 +116,22 @@ export type Service = AppService | AdService | KafkaService | EventService | DBC
 export type Controller = AppController | TableController | WaiterController | MenuItemController | MenuController;
 export type Module = typeof myModule;
 
-// Створюємо глобальну змінну поза функцією
 const globalSingletons = new Map<any, any>();
 
 export function getModuleSingleton(module: Module, myClass: Module['controllers'][0] | Module['providers'][0]): Service | Controller {
   function getInstance(ClassType: any): any {
-    // Перевіряємо глобальний кеш сінглтонів
     if (globalSingletons.has(ClassType)) {
       return globalSingletons.get(ClassType);
     }
 
     const paramTypes = getExtractedParamTypes(ClassType);
     
-    // Якщо клас не має залежностей, створюємо його екземпляр
     if (paramTypes.length === 0) {
       const instance = new ClassType();
       globalSingletons.set(ClassType, instance);
       return instance;
     }
 
-    // Створюємо екземпляри залежностей
     const dependencies = paramTypes.map(paramTypeName => {
       const dependencyClass = [...module.controllers, ...module.providers]
         .find(cls => cls.name === paramTypeName);
